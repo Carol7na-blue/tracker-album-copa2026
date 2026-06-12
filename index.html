@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum Copa 2026 — Tracker Panini</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --verde: #009c3b;
+    --amarelo: #FFDF00;
+    --azul: #002776;
+    --bg: #0f1117;
+    --card: #1a1e2b;
+    --borda: #2a2f40;
+    --texto: #e8eaf0;
+    --dim: #7a7f96;
+    --tenho: #22c55e;
+    --falta: #ef4444;
+    --rep: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--texto); font-family: 'Inter', sans-serif; font-size: 14px; min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, var(--azul) 0%, #001550 100%);
+    border-bottom: 3px solid var(--amarelo);
+    padding: 16px 20px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--amarelo); }
+  header .sub { font-size: 11px; color: #a0a8c0; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+
+  .prog-wrap { flex: 1; min-width: 180px; }
+  .prog-labels { display: flex; justify-content: space-between; font-size: 11px; color: #a0a8c0; margin-bottom: 4px; }
+  .prog-bg { background: rgba(255,255,255,0.1); border-radius: 4px; height: 7px; overflow: hidden; }
+  .prog-fill { background: linear-gradient(90deg, var(--verde), var(--amarelo)); height: 100%; border-radius: 4px; transition: width .4s; width: 0%; }
+
+  .stats-bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .pill { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+  .pill.t { background: rgba(34,197,94,.15); color: var(--tenho); border: 1px solid rgba(34,197,94,.3); }
+  .pill.f { background: rgba(239,68,68,.15); color: var(--falta); border: 1px solid rgba(239,68,68,.3); }
+  .pill.r { background: rgba(245,158,11,.15); color: var(--rep); border: 1px solid rgba(245,158,11,.3); }
+  .pill.tot { background: rgba(255,255,255,.07); color: var(--dim); border: 1px solid rgba(255,255,255,.1); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot.t { background: var(--tenho); } .dot.f { background: var(--falta); } .dot.r { background: var(--rep); }
+
+  .rst-btn { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); color: rgba(239,68,68,.7); font-size: 11px; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-weight: 600; transition: all .15s; }
+  .rst-btn:hover { background: rgba(239,68,68,.18); color: var(--falta); }
+
+  .legenda { background: var(--card); border-bottom: 1px solid var(--borda); padding: 8px 20px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .legenda span { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 5px; }
+  .legenda strong { color: var(--texto); }
+  .lb { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:5px; font-size:10px; font-weight:700; }
+  .lb.t { background:rgba(34,197,94,.2); color:var(--tenho); border:1px solid var(--tenho); }
+  .lb.f { background:rgba(239,68,68,.2); color:var(--falta); border:1px solid var(--falta); }
+  .lb.r { background:rgba(245,158,11,.2); color:var(--rep); border:1px solid var(--rep); }
+  .sep { color: var(--borda); }
+
+  main { padding: 18px 20px 50px; max-width: 1400px; margin: 0 auto; }
+
+  .grupo { margin-bottom: 28px; }
+  .grupo-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:7px; border-bottom:2px solid var(--borda); }
+  .grupo-lbl { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; color:var(--amarelo); }
+
+  .sel-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:10px; }
+
+  .sel-card { background:var(--card); border:1px solid var(--borda); border-radius:10px; overflow:hidden; }
+  .sel-card:hover { border-color:#3a4060; }
+
+  .sel-hdr { display:flex; align-items:center; gap:9px; padding:9px 12px 7px; cursor:pointer; user-select:none; }
+  .flag { font-size:20px; flex-shrink:0; }
+  .sel-nome { font-weight:700; font-size:13px; }
+  .sel-conf { font-size:10px; color:var(--dim); font-weight:500; }
+  .tog { background:none; border:none; color:var(--dim); cursor:pointer; font-size:11px; padding:0 3px; }
+
+  .mbar-wrap { padding:0 12px 3px; }
+  .mbar-bg { height:3px; background:rgba(255,255,255,.07); border-radius:2px; overflow:hidden; }
+  .mbar-fill { height:100%; background:var(--verde); border-radius:2px; transition:width .3s; }
+
+  .sel-stats { display:flex; gap:5px; padding:3px 12px 7px; }
+  .ss { font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; }
+  .ss.t { background:rgba(34,197,94,.12); color:var(--tenho); }
+  .ss.f { background:rgba(239,68,68,.12); color:var(--falta); }
+  .ss.r { background:rgba(245,158,11,.12); color:var(--rep); }
+  .ss.tot { background:rgba(255,255,255,.05); color:var(--dim); }
+
+  .figs-wrap { display:none; padding:0 12px 12px; border-top:1px solid var(--borda); padding-top:9px; }
+  .figs-wrap.open { display:block; }
+
+  .ftlbl { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--dim); margin-bottom:5px; margin-top:7px; font-weight:600; }
+  .ftlbl:first-child { margin-top:0; }
+  .frow { display:flex; flex-wrap:wrap; gap:4px; }
+
+  .acts { display:flex; gap:5px; padding:0 0 7px; }
+  .act-btn { font-size:10px; font-weight:600; padding:3px 7px; border-radius:4px; cursor:pointer; border:none; background:rgba(255,255,255,.06); color:var(--dim); transition:all .15s; }
+  .act-btn:hover { background:rgba(255,255,255,.12); color:var(--texto); }
+
+  /* FIGURINHA */
+  .fig { width:34px; height:34px; border-radius:6px; font-size:9px; font-weight:700; cursor:pointer; border:1.5px solid; transition:all .15s; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1px; }
+  .fig .fn { font-size:9px; }
+  .fig .fr { font-size:7px; line-height:1; }
+
+  .fig.s0 { background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.3); color:rgba(239,68,68,.45); }
+  .fig.s1 { background:rgba(34,197,94,.15); border-color:var(--tenho); color:var(--tenho); }
+  .fig.s2 { background:rgba(245,158,11,.15); border-color:var(--rep); color:var(--rep); }
+  .fig.s0:hover { background:rgba(239,68,68,.2); border-color:var(--falta); color:var(--falta); }
+
+  .fig.sp.s0 { background:rgba(255,215,0,.07); border-color:rgba(255,215,0,.25); color:rgba(255,215,0,.4); }
+  .fig.sp.s1 { background:rgba(255,215,0,.15); border-color:gold; color:gold; }
+  .fig.sp.s2 { background:rgba(245,158,11,.2); border-color:var(--rep); color:var(--rep); }
+
+  .toast { position:fixed; bottom:20px; right:20px; background:var(--card); border:1px solid var(--borda); border-radius:8px; padding:9px 15px; font-size:12px; font-weight:600; opacity:0; transform:translateY(6px); transition:all .2s; pointer-events:none; z-index:999; }
+  .toast.show { opacity:1; transform:translateY(0); }
+
+  footer { text-align:center; color:var(--dim); font-size:11px; padding:18px; border-top:1px solid var(--borda); margin-top:16px; }
+
+  @media(max-width:600px){
+    header{padding:10px 14px;gap:10px;}
+    main{padding:12px 10px 40px;}
+    header h1{font-size:20px;}
+    .sel-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚽ COPA 2026</h1>
+    <span class="sub">Álbum Panini • Tracker Oficial</span>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-labels"><span>Progresso</span><span id="pct">0%</span></div>
+    <div class="prog-bg"><div class="prog-fill" id="gbar"></div></div>
+  </div>
+  <div class="stats-bar">
+    <div class="pill t"><span class="dot t"></span><span id="gt">0</span> tenho</div>
+    <div class="pill f"><span class="dot f"></span><span id="gf">0</span> falta</div>
+    <div class="pill r"><span class="dot r"></span><span id="gr">0</span> repetidas</div>
+    <div class="pill tot">/ <span id="gtot">0</span></div>
+    <button class="rst-btn" onclick="resetAll()">🗑 Resetar</button>
+  </div>
+</header>
+
+<div class="legenda">
+  <span><span class="lb f">✕</span> <strong>Falta</strong> — clique 1×</span>
+  <span class="sep">|</span>
+  <span><span class="lb t">✓</span> <strong>Tenho</strong> — clique 2×</span>
+  <span class="sep">|</span>
+  <span><span class="lb r">2×</span> <strong>Repetida</strong> — clique 3× reset</span>
+  <span class="sep">|</span>
+  <span>💡 Clique no nome para expandir</span>
+</div>
+
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+<footer>Álbum oficial Panini FIFA World Cup 2026™ • 48 seleções • 980 figurinhas<br>Dados salvos automaticamente no navegador.</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// DADOS (baseados na planilha da imagem)
+// ─────────────────────────────────────────────
+
+// Seções especiais
+const SECOES_ESPECIAIS = [
+  {
+    id: "FWC", nome: "FIFA World Cup History", sub: "Página inicial", flag: "🏆",
+    // FWC: figurinha 0 a 8 (primeira linha) e 9 a 19 (segunda linha) = 20 figurinhas (0..19)
+    figs: Array.from({length:20}, (_,i)=>({ cod:`FWC-${String(i).padStart(2,'0')}`, label:String(i), desc:`FWC ${i}`, sp:true }))
+  },
+  {
+    id: "CC", nome: "Figurinhas da Coca-Cola", sub: "CC 1–14", flag: "🥤",
+    // CC: 1 a 14
+    figs: Array.from({length:14}, (_,i)=>({ cod:`CC-${String(i+1).padStart(2,'0')}`, label:String(i+1), desc:`Coca-Cola ${i+1}`, sp:true }))
+  },
+];
+
+// Grupos com seleções na ordem exata da planilha
+const GRUPOS = [
+  { id:"A", selecoes:[
+    {id:"MEX",nome:"México",flag:"🇲🇽",conf:"CONCACAF"},
+    {id:"RSA",nome:"África do Sul",flag:"🇿🇦",conf:"CAF"},
+    {id:"KOR",nome:"Coreia do Sul",flag:"🇰🇷",conf:"AFC"},
+    {id:"CZE",nome:"Rep. Tcheca",flag:"🇨🇿",conf:"UEFA"},
+  ]},
+  { id:"B", selecoes:[
+    {id:"CAN",nome:"Canadá",flag:"🇨🇦",conf:"CONCACAF"},
+    {id:"BIH",nome:"Bósnia",flag:"🇧🇦",conf:"UEFA"},
+    {id:"QAT",nome:"Catar",flag:"🇶🇦",conf:"AFC"},
+    {id:"SUI",nome:"Suíça",flag:"🇨🇭",conf:"UEFA"},
+  ]},
+  { id:"C", selecoes:[
+    {id:"BRA",nome:"Brasil",flag:"🇧🇷",conf:"CONMEBOL"},
+    {id:"MAR",nome:"Marrocos",flag:"🇲🇦",conf:"CAF"},
+    {id:"HAI",nome:"Haiti",flag:"🇭🇹",conf:"CONCACAF"},
+    {id:"SCO",nome:"Escócia",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",conf:"UEFA"},
+  ]},
+  { id:"D", selecoes:[
+    {id:"USA",nome:"Estados Unidos",flag:"🇺🇸",conf:"CONCACAF"},
+    {id:"PAR",nome:"Paraguai",flag:"🇵🇾",conf:"CONMEBOL"},
+    {id:"AUS",nome:"Austrália",flag:"🇦🇺",conf:"AFC"},
+    {id:"TUR",nome:"Turquia",flag:"🇹🇷",conf:"UEFA"},
+  ]},
+  { id:"E", selecoes:[
+    {id:"GER",nome:"Alemanha",flag:"🇩🇪",conf:"UEFA"},
+    {id:"CUW",nome:"Curaçao",flag:"🇨🇼",conf:"CONCACAF"},
+    {id:"CIV",nome:"Costa do Marfim",flag:"🇨🇮",conf:"CAF"},
+    {id:"ECU",nome:"Equador",flag:"🇪🇨",conf:"CONMEBOL"},
+  ]},
+  { id:"F", selecoes:[
+    {id:"NED",nome:"Holanda",flag:"🇳🇱",conf:"UEFA"},
+    {id:"JPN",nome:"Japão",flag:"🇯🇵",conf:"AFC"},
+    {id:"SWE",nome:"Suécia",flag:"🇸🇪",conf:"UEFA"},
+    {id:"TUN",nome:"Tunísia",flag:"🇹🇳",conf:"CAF"},
+  ]},
+  { id:"G", selecoes:[
+    {id:"BEL",nome:"Bélgica",flag:"🇧🇪",conf:"UEFA"},
+    {id:"EGY",nome:"Egito",flag:"🇪🇬",conf:"CAF"},
+    {id:"IRN",nome:"Irã",flag:"🇮🇷",conf:"AFC"},
+    {id:"NZL",nome:"Nova Zelândia",flag:"🇳🇿",conf:"OFC"},
+  ]},
+  { id:"H", selecoes:[
+    {id:"ESP",nome:"Espanha",flag:"🇪🇸",conf:"UEFA"},
+    {id:"CPV",nome:"Cabo Verde",flag:"🇨🇻",conf:"CAF"},
+    {id:"KSA",nome:"Arábia Saudita",flag:"🇸🇦",conf:"AFC"},
+    {id:"URU",nome:"Uruguai",flag:"🇺🇾",conf:"CONMEBOL"},
+  ]},
+  { id:"I", selecoes:[
+    {id:"FRA",nome:"França",flag:"🇫🇷",conf:"UEFA"},
+    {id:"SEN",nome:"Senegal",flag:"🇸🇳",conf:"CAF"},
+    {id:"IRQ",nome:"Iraque",flag:"🇮🇶",conf:"AFC"},
+    {id:"NOR",nome:"Noruega",flag:"🇳🇴",conf:"UEFA"},
+  ]},
+  { id:"J", selecoes:[
+    {id:"ARG",nome:"Argentina",flag:"🇦🇷",conf:"CONMEBOL"},
+    {id:"ALG",nome:"Argélia",flag:"🇩🇿",conf:"CAF"},
+    {id:"AUT",nome:"Áustria",flag:"🇦🇹",conf:"UEFA"},
+    {id:"JOR",nome:"Jordânia",flag:"🇯🇴",conf:"AFC"},
+  ]},
+  { id:"K", selecoes:[
+    {id:"POR",nome:"Portugal",flag:"🇵🇹",conf:"UEFA"},
+    {id:"COD",nome:"Congo",flag:"🇨🇩",conf:"CAF"},
+    {id:"UZB",nome:"Uzbequistão",flag:"🇺🇿",conf:"AFC"},
+    {id:"COL",nome:"Colômbia",flag:"🇨🇴",conf:"CONMEBOL"},
+  ]},
+  { id:"L", selecoes:[
+    {id:"ENG",nome:"Inglaterra",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",conf:"UEFA"},
+    {id:"CRO",nome:"Croácia",flag:"🇭🇷",conf:"UEFA"},
+    {id:"GHA",nome:"Gana",flag:"🇬🇭",conf:"CAF"},
+    {id:"PAN",nome:"Panamá",flag:"🇵🇦",conf:"CONCACAF"},
+  ]},
+];
+
+// Figurinhas 1–20 por seleção
+function getFigs(id) {
+  return Array.from({length:20}, (_,i)=>({
+    cod:`${id}-${String(i+1).padStart(2,'0')}`,
+    label:String(i+1),
+    desc:`${id} #${i+1}`,
+    sp: i===0 // figurinha 1 = escudo (especial visual)
+  }));
+}
+
+// Total esperado: 20 FWC + 14 CC + 48×20 = 994? Não — vamos contar:
+// A planilha mostra FWC (0..19 = 20 figs) + CC (1..14 = 14 figs) + 48×20 = 994
+// Mas o álbum tem 980. Verificando a planilha: FWC vai de 0 a 8 (9 figs) e 9 a 19 (11 figs) = 20 figs totais? 
+// Ou FWC vai de 1 a 19 = 19 figs + a fig "0" da página inicial = 20?
+// CC = 14 figs. 20 + 14 + 48×20 = 994. 
+// Possível: CC não conta para completar o álbum (são promoção). FWC 0–19 = 20? mas 20+960=980. ✓
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const KEY = 'copa2026v2';
+let state = {};
+
+function load() { try { const s=localStorage.getItem(KEY); if(s) state=JSON.parse(s); } catch(e){} }
+function save() { try { localStorage.setItem(KEY,JSON.stringify(state)); } catch(e){} }
+function getS(cod){ return state[cod]??0; }
+function nextS(cod){
+  const n=(getS(cod)+1)%3;
+  if(n===0) delete state[cod]; else state[cod]=n;
+  save(); return n;
+}
+
+// ─────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────
+function allFigs() {
+  const out = [];
+  SECOES_ESPECIAIS.forEach(s => s.figs.forEach(f => out.push(f)));
+  GRUPOS.forEach(g => g.selecoes.forEach(s => getFigs(s.id).forEach(f => out.push(f))));
+  return out;
+}
+
+function calcGlobal() {
+  let t=0,r=0,tot=0;
+  // FWC conta; CC não conta pro total oficial
+  SECOES_ESPECIAIS[0].figs.forEach(f=>{ tot++; const s=getS(f.cod); if(s===1)t++; if(s===2)r++; });
+  GRUPOS.forEach(g=>g.selecoes.forEach(sel=>getFigs(sel.id).forEach(f=>{
+    tot++; const s=getS(f.cod); if(s===1)t++; if(s===2)r++;
+  })));
+  return {t,r,f:tot-t-r,tot};
+}
+
+function updGlobal() {
+  const {t,r,f,tot}=calcGlobal();
+  document.getElementById('gt').textContent=t;
+  document.getElementById('gf').textContent=f;
+  document.getElementById('gr').textContent=r;
+  document.getElementById('gtot').textContent=tot;
+  const pct=tot?Math.round(t/tot*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('gbar').style.width=pct+'%';
+}
+
+function updCardStats(id, figs) {
+  let t=0,r=0;
+  figs.forEach(f=>{ const s=getS(f.cod); if(s===1)t++; if(s===2)r++; });
+  const fl=figs.length-t-r;
+  const el=document.getElementById('st-'+id);
+  if(!el)return;
+  el.querySelector('.st').textContent=`✓ ${t}`;
+  el.querySelector('.sf').textContent=`✕ ${fl}`;
+  el.querySelector('.sr').textContent=`2× ${r}`;
+  const pct=Math.round(t/figs.length*100);
+  const bar=document.getElementById('bar-'+id);
+  if(bar) bar.style.width=pct+'%';
+}
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1100);
+}
+
+// ─────────────────────────────────────────────
+// CLICK
+// ─────────────────────────────────────────────
+function clickFig(cod, cardId, figs) {
+  const st=nextS(cod);
+  const btn=document.getElementById('f-'+cod);
+  if(!btn)return;
+  btn.className=btn.className.replace(/s\d/,`s${st}`);
+  const fr=btn.querySelector('.fr');
+  if(st===2){ if(!fr){const s=document.createElement('span');s.className='fr';s.textContent='2×';btn.appendChild(s);} }
+  else if(fr) fr.remove();
+  const lbls=['✕ Falta','✓ Tenho!','🔁 Repetida'];
+  toast(`${cod} → ${lbls[st]}`);
+  updCardStats(cardId, figs);
+  updGlobal();
+}
+
+function markAll(cardId, figs, val){
+  figs.forEach(f=>{ if(val===0) delete state[f.cod]; else state[f.cod]=val; });
+  save();
+  figs.forEach(f=>{
+    const btn=document.getElementById('f-'+f.cod); if(!btn)return;
+    const st=getS(f.cod);
+    btn.className=btn.className.replace(/s\d/,`s${st}`);
+    const fr=btn.querySelector('.fr');
+    if(st===2&&!fr){const s=document.createElement('span');s.className='fr';s.textContent='2×';btn.appendChild(s);}
+    else if(st!==2&&fr) fr.remove();
+  });
+  updCardStats(cardId, figs);
+  updGlobal();
+  toast(val===1?`✓ ${cardId}: todas!`:`✕ ${cardId}: limpas`);
+}
+
+function toggle(id){
+  const w=document.getElementById('fw-'+id);
+  const b=document.getElementById('tg-'+id);
+  w.classList.toggle('open');
+  b.textContent=w.classList.contains('open')?'▲':'▼';
+}
+
+// ─────────────────────────────────────────────
+// RENDER CARD
+// ─────────────────────────────────────────────
+function makeCard(id, nome, sub, flag, figs, grupos) {
+  const card=document.createElement('div');
+  card.className='sel-card';
+
+  const figsHtml=figs.map(f=>`
+    <button class="fig ${f.sp?'sp':''} s${getS(f.cod)}" id="f-${f.cod}"
+      onclick="clickFig('${f.cod}','${id}',_figs['${id}'])" title="${f.desc}">
+      <span class="fn">${f.label}</span>
+      ${getS(f.cod)===2?'<span class="fr">2×</span>':''}
+    </button>
+  `).join('');
+
+  card.innerHTML=`
+    <div class="sel-hdr" onclick="toggle('${id}')">
+      <span class="flag">${flag}</span>
+      <div style="flex:1">
+        <div class="sel-nome">${nome}</div>
+        <div class="sel-conf">${sub}</div>
+      </div>
+      <button class="tog" id="tg-${id}">▼</button>
+    </div>
+    <div class="mbar-wrap"><div class="mbar-bg"><div class="mbar-fill" id="bar-${id}" style="width:0%"></div></div></div>
+    <div class="sel-stats" id="st-${id}">
+      <span class="ss t st">✓ 0</span>
+      <span class="ss f sf">✕ ${figs.length}</span>
+      <span class="ss r sr">2× 0</span>
+      <span class="ss tot">${figs.length} total</span>
+    </div>
+    <div class="figs-wrap" id="fw-${id}">
+      <div class="acts">
+        <button class="act-btn" onclick="markAll('${id}',_figs['${id}'],1)">✓ Marcar todas</button>
+        <button class="act-btn" onclick="markAll('${id}',_figs['${id}'],0)">✕ Limpar</button>
+      </div>
+      <div class="frow">${figsHtml}</div>
+    </div>
+  `;
+  return card;
+}
+
+// ─────────────────────────────────────────────
+// RENDER PRINCIPAL
+// ─────────────────────────────────────────────
+const _figs = {}; // cache de figs por id de card
+
+function render(){
+  const main=document.getElementById('main');
+  main.innerHTML='';
+
+  // Seções especiais (FWC e CC)
+  const espDiv=document.createElement('div');
+  espDiv.className='grupo';
+  espDiv.innerHTML=`<div class="grupo-hdr"><span class="grupo-lbl">✨ Especiais</span><span style="font-size:11px;color:var(--dim);margin-left:auto">FWC (0–19) • CC Coca-Cola (1–14)</span></div>`;
+  const espGrid=document.createElement('div');
+  espGrid.className='sel-grid';
+
+  SECOES_ESPECIAIS.forEach(sec=>{
+    _figs[sec.id]=sec.figs;
+    espGrid.appendChild(makeCard(sec.id, sec.nome, sec.sub, sec.flag, sec.figs));
+    updCardStats(sec.id, sec.figs);
+  });
+
+  espDiv.appendChild(espGrid);
+  main.appendChild(espDiv);
+
+  // Grupos
+  GRUPOS.forEach(g=>{
+    const div=document.createElement('div');
+    div.className='grupo';
+    div.innerHTML=`<div class="grupo-hdr"><span class="grupo-lbl">Grupo ${g.id}</span></div>`;
+    const grid=document.createElement('div');
+    grid.className='sel-grid';
+
+    g.selecoes.forEach(sel=>{
+      const figs=getFigs(sel.id);
+      _figs[sel.id]=figs;
+      grid.appendChild(makeCard(sel.id, sel.nome, sel.conf, sel.flag, figs));
+      updCardStats(sel.id, figs);
+    });
+
+    div.appendChild(grid);
+    main.appendChild(div);
+  });
+
+  updGlobal();
+}
+
+function resetAll(){
+  if(!confirm('Resetar TUDO? Seu progresso será apagado.'))return;
+  state={}; save(); render(); toast('🗑 Tudo resetado!');
+}
+
+// INIT
+load();
+render();
+</script>
+</body>
+</html>
