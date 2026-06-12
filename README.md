@@ -1,0 +1,1 @@
+# tracker-album-copa2026
